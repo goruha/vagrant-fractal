@@ -1,0 +1,29 @@
+---
+  coredb:
+    url: "https://s3.amazonaws.com/sci-devops/docker/images/latest/coredb.tar.gz"
+    network_mapping:
+      -
+        sport: "5000"
+        dport: "6000"
+        interface_ip: "127.0.0.1"
+        protocol: "udp"
+      -
+        sport: "5001"
+        dport: "6001"
+      -
+        sport: "5002"
+        dport: "6002"
+  athena:
+    url: "https://s3.amazonaws.com/sci-devops/docker/images/latest/athenaapp.tar.gz"
+    network_mapping:
+      -
+        sport: "5000"
+        dport: "6000"
+        interface_ip: "127.0.0.1"
+        protocol: "udp"
+      -
+        sport: "5001"
+        dport: "6001"
+      -
+        sport: "5002"
+        dport: "6002"
