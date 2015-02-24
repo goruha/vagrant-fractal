@@ -1,6 +1,6 @@
 require 'vagrant'
 
-require "vagrant-fractal/version"
-require "vagrant-fractal/plugin"
-require "vagrant-fractal/command"
-require "vagrant-fractal/config"
+require_relative "vagrant-fractal/plugin"
+require_relative "vagrant-fractal/version"
+require_relative "vagrant-fractal/command"
+#require "vagrant-fractal/config"

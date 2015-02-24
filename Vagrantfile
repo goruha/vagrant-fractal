@@ -1,4 +1,5 @@
 Vagrant.configure("2") do |config|
+  p config.fractal.data
   config.vm.define "webserver" do |machine|
     machine.vm.network :private_network, ip: "172.33.10.50"
 

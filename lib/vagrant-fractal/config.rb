@@ -1,10 +1,10 @@
 require 'yaml'
 
 module VagrantPlugins
-  module Environments
-    class Fractal < Vagrant.plugin(2, :config)
-      attr_accessor :file, :active, :default_environment
-      attr_reader :data
+  module Fractal
+    class Config < Vagrant.plugin(2, :config)
+      attr_accessor :file
+      attr_reader :active
 
       DEFAULT_SETTINGS = {
         file: 'fractal.yaml'
@@ -12,8 +12,8 @@ module VagrantPlugins
 
       def initialize
         @file = UNSET_VALUE
-        @active = UNSET_VALUE
-        @default_environment = UNSET_VALUE
+        @filter = UNSET_VALUE
+        @raw = nil
       end
 
       def file=(path)
@@ -21,18 +21,13 @@ module VagrantPlugins
       end
 
       def active
-
-        if @active == UNSET_VALUE
-          @active = ENV['VAGRANT_ENVIRONMENT'].nil? ? @default_environment : ENV['VAGRANT_ENVIRONMENT']
-        end
-
-        @active
-
+        validate(nil)
+        @filter == UNSET_VALUE ? raw.keys : @filter
       end
 
       def data
         validate(nil)
-        YAML.load_file(@file)
+        raw.select { |key,_| active.include? key }
       end
 
       def validate(_)
@@ -41,9 +36,11 @@ module VagrantPlugins
 
         if File.file?(@file)
           begin
-            environments = YAML.load_file(@file)
-            p environments.inspect
-            errors.push("There is no #{@active} environment in #{@file}") unless environments.has_key?(@active)
+            unless @filter == UNSET_VALUE
+              @filter.each do |box|
+                errors.push("There is no #{box} box in #{@file}") unless raw.has_key?(box)
+              end
+            end
           rescue Exception
             errors.push("file #{@file} have wrong format")
           end
@@ -51,12 +48,22 @@ module VagrantPlugins
           errors.push("file #{@file} does not exists") 
         end
 
-        { 'environments' => errors }
+        { 'fractal' => errors }
       end
 
       def finalize! 
         @file = DEFAULT_SETTINGS[:file] if @file == UNSET_VALUE
-        active
+        @filter = docker_boxes.split(',').map{|box| box.strip } unless docker_boxes == UNSET_VALUE
+      end
+
+      private
+
+      def raw
+        @raw ||= YAML.load_file(@file)
+      end
+
+      def docker_boxes
+        ENV[VagrantPlugins::Fractal::ENVIRONMENT_VARIABLE].nil? ? UNSET_VALUE : ENV[VagrantPlugins::Fractal::ENVIRONMENT_VARIABLE];
       end
 
     end #Config
